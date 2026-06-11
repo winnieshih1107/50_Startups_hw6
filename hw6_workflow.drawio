@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-06-12" agent="Claude Sonnet 4.6" version="24.0.0">
+  <diagram name="CRISP-DM 50 Startups" id="crisp-dm-50startups">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1350" math="0" shadow="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- START -->
+        <mxCell id="2" value="START" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#2C3E50;fontColor=#FFFFFF;strokeColor=#BDC3C7;shadow=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="325" y="20" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 1: Business Understanding -->
+        <mxCell id="3" value="&lt;b&gt;Phase 1 — Business Understanding&lt;/b&gt;&lt;br/&gt;Goal: Predict startup annual Profit &amp;nbsp;•&amp;nbsp; Target: continuous Profit (USD)&lt;br/&gt;Success: CV R² ≥ 0.90 &amp;nbsp;|&amp;nbsp; CV RMSE &lt; $15,000" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#2E86C1;fontColor=#FFFFFF;strokeColor=#1A5276;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="130" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 2: Data Understanding -->
+        <mxCell id="4" value="&lt;b&gt;Phase 2 — Data Understanding&lt;/b&gt;&lt;br/&gt;50 rows × 5 cols &amp;nbsp;•&amp;nbsp; No missing values &amp;nbsp;•&amp;nbsp; R&amp;D Spend: r = 0.973 ★&lt;br/&gt;Administration: p=0.61 (weak) &amp;nbsp;|&amp;nbsp; State: p&gt;0.95 (not predictive at n=50)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#17A589;fontColor=#FFFFFF;strokeColor=#0E6251;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="260" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 3: Data Preparation -->
+        <mxCell id="5" value="&lt;b&gt;Phase 3 — Data Preparation&lt;/b&gt;&lt;br/&gt;Engineer: RD_Ratio = R&amp;D/Total_Spend &amp;nbsp;|&amp;nbsp; Log_RD = log1p(R&amp;D Spend)&lt;br/&gt;Drop State (0/5 votes) &amp;nbsp;•&amp;nbsp; StandardScaler in Pipeline &amp;nbsp;•&amp;nbsp; 80/20 Split" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#229954;fontColor=#FFFFFF;strokeColor=#145A32;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="390" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 4: Modeling -->
+        <mxCell id="6" value="&lt;b&gt;Phase 4 — Modeling&lt;/b&gt;&lt;br/&gt;6 Models: LinearReg / Ridge / Lasso / ElasticNet / RandomForest / GBM&lt;br/&gt;RepeatedKFold(n_splits=5, n_repeats=10) = 50 CV scores &amp;nbsp;•&amp;nbsp; Alpha auto-tuned" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#7D3C98;fontColor=#FFFFFF;strokeColor=#4A235A;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="520" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 5: Evaluation -->
+        <mxCell id="7" value="&lt;b&gt;Phase 5 — Evaluation&lt;/b&gt;&lt;br/&gt;Metrics: CV R², RMSE, MAE, MAPE &amp;nbsp;•&amp;nbsp; Residual analysis &amp;nbsp;•&amp;nbsp; Feature importance&lt;br/&gt;Best: Lasso (baseline) &amp;nbsp; CV R²=0.9317 &amp;nbsp; CV RMSE=$9,527 &amp;nbsp; Test R²=0.9001" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#CA6F1E;fontColor=#FFFFFF;strokeColor=#7E5109;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="650" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Decision Diamond -->
+        <mxCell id="8" value="R² ≥ 0.90 ?&lt;br/&gt;RMSE &lt; $15k ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#C0392B;fontColor=#FFFFFF;strokeColor=#922B21;fontSize=12;fontStyle=1;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="780" width="240" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 6: Deployment -->
+        <mxCell id="9" value="&lt;b&gt;Phase 6 — Deployment&lt;/b&gt;&lt;br/&gt;Save: 50_startups_best_model.pkl &amp;nbsp;•&amp;nbsp; API: predict_profit(rd, admin, mkt)&lt;br/&gt;Monitor: RMSE monthly &amp;nbsp;•&amp;nbsp; Re-train trigger: RMSE &gt; $12,000" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#943126;fontColor=#FFFFFF;strokeColor=#641E16;fontSize=11;shadow=1;spacingTop=6;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="150" y="945" width="550" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- END -->
+        <mxCell id="10" value="END" style="ellipse;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;fillColor=#2C3E50;fontColor=#FFFFFF;strokeColor=#BDC3C7;shadow=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="325" y="1078" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: START → P1 -->
+        <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="2" target="3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P1 → P2 -->
+        <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P2 → P3 -->
+        <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P3 → P4 -->
+        <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="5" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P4 → P5 -->
+        <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="7" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P5 → Decision -->
+        <mxCell id="16" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="7" target="8" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Decision → P6 (YES) -->
+        <mxCell id="17" value="YES ✓" style="edgeStyle=orthogonalEdgeStyle;fontColor=#27AE60;fontStyle=1;strokeColor=#27AE60;fontSize=11;" edge="1" source="8" target="9" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: P6 → END -->
+        <mxCell id="18" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="9" target="10" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Feedback Arrow: Decision → P4 (NO — Re-tune) -->
+        <mxCell id="19" value="NO — Re-tune" style="edgeStyle=orthogonalEdgeStyle;fontColor=#C0392B;fontStyle=1;strokeColor=#C0392B;fontSize=11;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="8" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="835" />
+              <mxPoint x="80" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

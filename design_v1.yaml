@@ -1,0 +1,616 @@
+project:
+  title: "50 Startups — CRISP-DM Expert Analysis"
+  version: "1.0"
+  date: "2026-06-11"
+  dataset: "Kaggle — 50 Startups (50_Startups.csv)"
+  script: "50_startups_expert.py"
+
+# ─────────────────────────────────────────────────────────────
+# 1. PROJECT OVERVIEW
+# ─────────────────────────────────────────────────────────────
+overview:
+  problem_statement: >
+    A venture capital firm wants to predict the annual profit of a startup
+    given its budget allocation across R&D, Administration, and Marketing,
+    and its operating U.S. state. The goal is to identify which spending
+    categories have the highest return and build a model to score new
+    investment candidates.
+
+  dataset:
+    source: "Kaggle — 50 Startups"
+    file: "50_Startups.csv"
+    rows: 50
+    columns: 5
+    target: "Profit (continuous USD)"
+    problem_type: "Supervised regression"
+
+  raw_features:
+    - name: "R&D Spend"
+      type: float64
+      description: "Annual research & development budget"
+    - name: "Administration"
+      type: float64
+      description: "Annual overhead / operational costs"
+    - name: "Marketing Spend"
+      type: float64
+      description: "Annual sales and advertising budget"
+    - name: "State"
+      type: string
+      description: "Operating state: New York / California / Florida"
+    - name: "Profit"
+      type: float64
+      role: target
+      description: "Annual net profit"
+
+# ─────────────────────────────────────────────────────────────
+# 2. PHASE 1 — BUSINESS UNDERSTANDING
+# ─────────────────────────────────────────────────────────────
+phase_1_business_understanding:
+  objective: >
+    Predict a startup's annual Profit from its spending allocation
+    to guide investor capital decisions.
+
+  business_questions:
+    - "Which spending category (R&D / Admin / Marketing) drives profit most?"
+    - "Does geographic location (State) meaningfully affect profit?"
+    - "Given a new startup's budget breakdown, what profit can we forecast?"
+
+  success_criteria:
+    - metric: "Test R²"
+      target: ">= 0.90"
+    - metric: "Test RMSE"
+      target: "< $15,000"
+    - metric: "CV stability"
+      target: "std(R²) < 0.10 across folds"
+
+  constraints:
+    - "Sample size is very small (n=50) — overfitting risk is high; single-split CV estimates are unreliable."
+    - "Model must remain interpretable for stakeholder presentation."
+
+# ─────────────────────────────────────────────────────────────
+# 3. PHASE 2 — DATA UNDERSTANDING
+# ─────────────────────────────────────────────────────────────
+phase_2_data_understanding:
+  quality_checks:
+    - check: "Missing values"
+      result: "None — dataset is complete"
+    - check: "Zero values"
+      result: "R&D Spend: 2 zeros; Marketing Spend: 3 zeros — valid business data"
+    - check: "Duplicate rows"
+      result: "None"
+    - check: "Skewness"
+      result: "All features within ±0.5 — no log transform needed on raw features"
+    - check: "Outliers (IQR x 1.5)"
+      result: "1 borderline Profit value ($14,681) — legitimate, retained"
+
+  descriptive_statistics:
+    - feature: "R&D Spend"
+      mean: 73722
+      std: 45902
+      min: 0
+      median: 73051
+      max: 165349
+    - feature: "Administration"
+      mean: 121345
+      std: 28018
+      min: 51283
+      median: 122700
+      max: 182646
+    - feature: "Marketing Spend"
+      mean: 211025
+      std: 122290
+      min: 0
+      median: 212716
+      max: 471784
+    - feature: "Profit"
+      mean: 112013
+      std: 40306
+      min: 14681
+      median: 107978
+      max: 192262
+
+  correlation_with_profit:
+    - feature: "R&D Spend"
+      pearson_r: 0.973
+      strength: "Very strong"
+    - feature: "Marketing Spend"
+      pearson_r: 0.748
+      strength: "Strong"
+    - feature: "Administration"
+      pearson_r: 0.201
+      strength: "Weak"
+
+  full_correlation_matrix:
+    rd_spend:
+      rd_spend: 1.000
+      administration: 0.242
+      marketing_spend: 0.724
+      profit: 0.973
+    administration:
+      rd_spend: 0.242
+      administration: 1.000
+      marketing_spend: -0.032
+      profit: 0.201
+    marketing_spend:
+      rd_spend: 0.724
+      administration: -0.032
+      marketing_spend: 1.000
+      profit: 0.748
+    profit:
+      rd_spend: 0.973
+      administration: 0.201
+      marketing_spend: 0.748
+      profit: 1.000
+
+  state_analysis:
+    note: >
+      State differences (~$15k spread) are smaller than one standard deviation
+      of Profit ($40k) — not a reliable discriminator.
+    by_state:
+      - state: "New York"
+        count: 17
+        mean_profit: 113756
+      - state: "California"
+        count: 17
+        mean_profit: 103905
+      - state: "Florida"
+        count: 16
+        mean_profit: 118774
+
+  output_figures:
+    - file: "phase2_understanding.png"
+      layout: "2x3 grid"
+      contents:
+        row_0:
+          - "Histogram: R&D Spend"
+          - "Histogram: Administration"
+          - "Histogram: Marketing Spend"
+        row_1:
+          - "Histogram: Profit"
+          - "Correlation heatmap"
+          - "R&D vs Profit scatter coloured by State"
+
+# ─────────────────────────────────────────────────────────────
+# 4. PHASE 3 — DATA PREPARATION
+# ─────────────────────────────────────────────────────────────
+phase_3_data_preparation:
+
+  step_1_feature_engineering:
+    note: >
+      Computed on the full dataframe before splitting. Scaler is still fit
+      only on training data inside the Pipeline — no data leakage.
+    new_features:
+      - name: "Total_Spend"
+        formula: "R&D Spend + Administration + Marketing Spend"
+        rationale: "Company size proxy"
+      - name: "RD_Ratio"
+        formula: "R&D Spend / Total_Spend"
+        rationale: "Research intensity — strategic positioning signal"
+      - name: "Log_RD"
+        formula: "log(1 + R&D Spend)"
+        rationale: "Captures diminishing returns; compresses large-value range"
+      - name: "Admin_Ratio"
+        formula: "Administration / Total_Spend"
+        rationale: "Overhead burden — efficiency signal"
+
+  step_2_feature_selection:
+    method: "Five-method consensus (majority vote >= 3/5)"
+    methods_used:
+      - "Correlation filter (|r| >= 0.30)"
+      - "SelectKBest (F-regression, top k=3)"
+      - "RFE (LinearRegression, top k=3)"
+      - "LassoCV (non-zero coefficient)"
+      - "Random Forest (importance >= mean)"
+    results:
+      - feature: "R&D Spend"
+        correlation: true
+        select_k_best: true
+        rfe: true
+        lasso_cv: true
+        random_forest: true
+        votes: "5/5"
+        decision: KEEP
+      - feature: "Marketing Spend"
+        correlation: true
+        select_k_best: true
+        rfe: true
+        lasso_cv: true
+        random_forest: false
+        votes: "4/5"
+        decision: KEEP
+      - feature: "Administration"
+        correlation: false
+        select_k_best: true
+        rfe: true
+        lasso_cv: true
+        random_forest: false
+        votes: "3/5"
+        decision: "Keep raw — replaced by ratio form in engineered set"
+      - feature: "State_Florida"
+        correlation: false
+        select_k_best: false
+        rfe: false
+        lasso_cv: false
+        random_forest: false
+        votes: "0/5"
+        decision: DROP
+      - feature: "State_New York"
+        correlation: false
+        select_k_best: false
+        rfe: false
+        lasso_cv: false
+        random_forest: false
+        votes: "0/5"
+        decision: DROP
+    drop_state_rationale: >
+      State is dropped entirely (not one-hot encoded). OLS p-values exceed 0.95
+      for both dummies. With 16–17 samples per state, there is insufficient
+      statistical power to detect geographic effects. This is a sample-size
+      limitation, not a claim that geography is universally irrelevant.
+
+  step_3_feature_sets:
+    note: "Two sets evaluated side-by-side throughout Phases 4 and 5."
+    sets:
+      baseline:
+        features:
+          - "R&D Spend"
+          - "Administration"
+          - "Marketing Spend"
+        description: "Replicates the original script — 3 raw numeric features"
+      engineered:
+        features:
+          - "R&D Spend"
+          - "Marketing Spend"
+          - "RD_Ratio"
+          - "Log_RD"
+        description: "Expert version — replaces Administration with ratio features"
+
+  step_4_train_test_split:
+    ratio: "80% train / 20% test"
+    train_size: 40
+    test_size: 10
+    random_state: 42
+    note: >
+      Identical indices used for both feature sets for fair comparison.
+      With n=50, the test set is only 10 rows — CV estimates are more
+      reliable than a single test evaluation.
+
+  step_5_preprocessing_pipeline:
+    structure:
+      - step: "StandardScaler"
+        note: "Fit on X_train only — no data leakage"
+      - step: "Model"
+    scaling_rationale: >
+      Feature standard deviations differ by up to 4x (R&D: $45k vs
+      Admin: $28k vs Marketing: $122k). Ridge, Lasso, and ElasticNet
+      penalise large raw coefficients — unscaled inputs bias regularisation.
+
+  step_6_cv_strategy:
+    method: "RepeatedKFold"
+    n_splits: 5
+    n_repeats: 10
+    random_state: 42
+    total_scores_per_model: 50
+    problem_with_plain_kfold: >
+      Plain KFold(5) on n=50 produced R² scores of
+      [0.89, -0.81, -0.42, -0.70, +0.43] — a range of 1.71.
+      Individual folds of 10 rows are too sensitive to which samples
+      land in validation.
+    fix: >
+      RepeatedKFold with 10 repeats gives 50 validation scores per model,
+      producing substantially more stable mean and std estimates.
+
+  output_figures:
+    - file: "phase3_preparation.png"
+      layout: "1x3 grid"
+      contents:
+        - "RD_Ratio distribution histogram"
+        - "Log_RD distribution histogram"
+        - "Before-scaling boxplots (raw scale comparison)"
+
+# ─────────────────────────────────────────────────────────────
+# 5. PHASE 4 — MODELING
+# ─────────────────────────────────────────────────────────────
+phase_4_modeling:
+
+  models:
+    - name: "LinearRegression"
+      type: "Linear"
+      hyperparameter_strategy: "No hyperparameters"
+    - name: "Ridge"
+      type: "Linear (L2)"
+      hyperparameter_strategy: "alpha auto-selected via RidgeCV"
+    - name: "Lasso"
+      type: "Linear (L1)"
+      hyperparameter_strategy: "alpha auto-selected via LassoCV"
+    - name: "ElasticNet"
+      type: "Linear (L1+L2)"
+      hyperparameter_strategy: "alpha and l1_ratio via ElasticNetCV"
+    - name: "RandomForestRegressor"
+      type: "Tree ensemble"
+      hyperparameter_strategy: "n_estimators=300, random_state=42"
+    - name: "GradientBoostingRegressor"
+      type: "Tree ensemble"
+      hyperparameter_strategy: "n_estimators=200, random_state=42"
+
+  alpha_grid:
+    type: "log-spaced"
+    start: 0.001
+    end: 10000
+    num_points: 100
+    formula: "np.logspace(-3, 4, 100)"
+
+  elastic_net_l1_ratio_grid:
+    - 0.1
+    - 0.3
+    - 0.5
+    - 0.7
+    - 0.9
+
+  training_protocol:
+    total_combinations: 12
+    loop: "for each feature_set in {baseline, engineered} x for each model in {6 models}"
+    steps:
+      - "cross_val_score(model, X_train, y_train, cv=RepeatedKFold(5x10), scoring='r2')"
+      - "cross_val_score(..., scoring='neg_mean_squared_error')"
+      - "model.fit(X_train, y_train)  # store fitted pipeline"
+
+  output_figures:
+    - file: "phase4_cv_results.png"
+      layout: "1x2 grid"
+      contents:
+        - "Grouped bar chart: CV R² — baseline vs engineered per model"
+        - "Grouped bar chart: CV RMSE — baseline vs engineered per model"
+      annotations:
+        - "Red dashed line marks R² = 0.90 target"
+
+# ─────────────────────────────────────────────────────────────
+# 6. PHASE 5 — EVALUATION
+# ─────────────────────────────────────────────────────────────
+phase_5_evaluation:
+
+  best_model_selection:
+    criterion: "Highest CV R² mean across all 12 model x feature-set combinations"
+
+  metrics:
+    - name: "R²"
+      formula: "1 - SS_res / SS_tot"
+      purpose: "Proportion of variance explained"
+    - name: "Adjusted R²"
+      formula: "1 - (1 - R²)(n - 1) / (n - p - 1)"
+      purpose: "Penalises unnecessary features"
+    - name: "RMSE"
+      formula: "sqrt(mean((y - y_hat)^2))"
+      purpose: "Error in same unit as Profit (USD)"
+    - name: "MAE"
+      formula: "mean(|y - y_hat|)"
+      purpose: "Robust to outliers; easy to explain"
+    - name: "MAPE"
+      formula: "mean(|y - y_hat| / y) x 100"
+      purpose: "Percentage error — scale-independent"
+
+  residual_diagnostics:
+    - "Residuals vs Predicted: checks for heteroscedasticity"
+    - "Residual histogram: checks for approximate normality"
+    - "Residual mean ≈ 0: verifies no systematic bias"
+
+  output_figures:
+    - file: "phase5_evaluation.png"
+      layout: "2x3 grid"
+      contents:
+        position_00: "Actual vs Predicted scatter with perfect-fit line and residual drops"
+        position_01: "Residuals vs Predicted"
+        position_02: "Residual distribution histogram"
+        position_10: "Feature coefficients (linear) or feature importances (tree)"
+        position_11: "All 12 models ranked by Test R² — horizontal bar chart"
+        position_12: "Performance summary table (CV vs Test)"
+
+# ─────────────────────────────────────────────────────────────
+# 7. PHASE 6 — DEPLOYMENT
+# ─────────────────────────────────────────────────────────────
+phase_6_deployment:
+
+  serialisation:
+    file: "50_startups_best_model.pkl"
+    library: "joblib"
+    note: >
+      Best pipeline is refit on the full dataset (train + test) before saving
+      to maximise use of all 50 observations.
+    pipeline_contents:
+      - "StandardScaler"
+      - "Best model"
+
+  prediction_api:
+    function: "predict_profit"
+    signature: "predict_profit(rd_spend: float, administration: float, marketing_spend: float) -> float"
+    steps:
+      - "Compute Total_Spend, RD_Ratio, Log_RD from the three raw inputs"
+      - "Select only the features used by the best model"
+      - "Call pipeline.predict() and return float"
+
+  demo_predictions:
+    - startup: "High R&D"
+      rd_spend: 150000
+      administration: 120000
+      marketing_spend: 300000
+      predicted_profit: ~175000
+    - startup: "Mid spender"
+      rd_spend: 50000
+      administration: 100000
+      marketing_spend: 100000
+      predicted_profit: ~90000
+    - startup: "No R&D"
+      rd_spend: 0
+      administration: 80000
+      marketing_spend: 50000
+      predicted_profit: ~50000
+
+  monitoring:
+    - trigger: "Monthly RMSE on new data > $15,000"
+      action: "Retrain pipeline"
+    - trigger: "R&D Spend input > $165,349 (training max)"
+      action: "Warn: extrapolation risk"
+    - trigger: "Marketing Spend input > $471,784 (training max)"
+      action: "Warn: extrapolation risk"
+    - trigger: "n_new >= 50 additional observations collected"
+      action: "Collect and retrain"
+
+# ─────────────────────────────────────────────────────────────
+# 8. EXPERT DESIGN DECISIONS
+# ─────────────────────────────────────────────────────────────
+expert_design_decisions:
+
+  - id: 1
+    title: "RepeatedKFold instead of KFold"
+    standard_approach:
+      method: "KFold(n_splits=5)"
+      cv_scores: 5
+      observed_r2_range: "-0.81 to +0.89"
+      stability: "Unstable"
+    expert_approach:
+      method: "RepeatedKFold(n_splits=5, n_repeats=10)"
+      cv_scores: 50
+      stability: "Substantially narrower range"
+    rationale: >
+      n=50 makes single splits too sensitive to which 10 rows land in
+      validation. Repeating 10 times gives stable mean and std without
+      requiring additional data.
+
+  - id: 2
+    title: "Drop State — not one-hot encode"
+    evidence:
+      ols_p_value_florida: 0.953
+      ols_p_value_new_york: 0.990
+      feature_selection_votes: "0 out of 5 methods"
+      samples_per_state: "16–17"
+    rationale: >
+      Adding near-zero predictors to a small dataset increases overfitting risk.
+      State may become significant with n >= 500. The drop decision is
+      data-size-driven, not domain-driven.
+
+  - id: 3
+    title: "Replace Administration with ratio features"
+    raw_form:
+      correlation_with_profit: 0.201
+      ols_p_value: 0.61
+      standardised_coefficient: -1841
+      problem: "Absolute overhead does not indicate efficiency"
+    expert_replacement:
+      feature: "Admin_Ratio = Administration / Total_Spend"
+      business_meaning: "Fraction of budget consumed by overhead"
+
+  - id: 4
+    title: "Auto-tune regularisation alphas"
+    standard_approach: "Hardcode alpha=1.0 (arbitrary)"
+    expert_approach: "RidgeCV, LassoCV, ElasticNetCV with 100-point log-spaced grid"
+    rationale: "Finds optimal alpha for this specific dataset via CV — no manual tuning required."
+
+  - id: 5
+    title: "Two feature sets compared side-by-side"
+    sets:
+      - "baseline: 3 raw numeric features"
+      - "engineered: expert-designed features"
+    rationale: >
+      Isolates the contribution of feature engineering. If engineered features
+      do not outperform baseline, the simpler set is preferred (Occam's razor).
+
+  - id: 6
+    title: "Refit on full data before deployment"
+    rationale: >
+      Scikit-learn best practice: after model selection is complete, refit on
+      all available data before serialising for production. With n=50,
+      every observation is valuable.
+
+# ─────────────────────────────────────────────────────────────
+# 9. FILE STRUCTURE
+# ─────────────────────────────────────────────────────────────
+file_structure:
+  root: "D:\\wi\\"
+  files:
+    - name: "50_Startups.csv"
+      role: "Source data (read-only)"
+    - name: "50_startups_crisp_dm.py"
+      role: "Original CRISP-DM script (preserved)"
+    - name: "50_startups_expert.py"
+      role: "Expert version — main script"
+    - name: "50_startups_best_model.pkl"
+      role: "Serialised best pipeline (joblib)"
+    - name: "design_v1.md"
+      role: "Design document — Markdown format"
+    - name: "design_v1.yaml"
+      role: "Design document — YAML format"
+    - name: "phase2_understanding.png"
+      role: "Phase 2 EDA figure"
+    - name: "phase3_preparation.png"
+      role: "Phase 3 feature engineering figure"
+    - name: "phase4_cv_results.png"
+      role: "Phase 4 CV model comparison figure"
+    - name: "phase5_evaluation.png"
+      role: "Phase 5 evaluation figure"
+
+# ─────────────────────────────────────────────────────────────
+# 10. KEY FINDINGS SUMMARY
+# ─────────────────────────────────────────────────────────────
+key_findings:
+
+  feature_importance_ranking:
+    - rank: 1
+      feature: "R&D Spend"
+      evidence: "r=0.97, RF importance=0.93, 5/5 selection votes"
+      action: "Always keep"
+    - rank: 2
+      feature: "Marketing Spend"
+      evidence: "r=0.75, 4/5 selection votes"
+      action: "Keep — note collinearity with R&D (r=0.72)"
+    - rank: 3
+      feature: "RD_Ratio"
+      evidence: "Better business meaning than raw Administration"
+      action: "Use in engineered feature set"
+    - rank: 4
+      feature: "Log_RD"
+      evidence: "Captures diminishing returns on R&D investment"
+      action: "Use in engineered feature set"
+    - rank: 5
+      feature: "Administration (raw)"
+      evidence: "r=0.20, p=0.61, coefficient negative after controls"
+      action: "Drop raw form — replace with Admin_Ratio"
+    - rank: 6
+      feature: "State"
+      evidence: "p > 0.95, 0/5 selection votes"
+      action: "Drop"
+
+  core_business_insight: >
+    Every dollar of R&D investment is associated with significantly higher profit.
+    R&D Spend explains ~95% of the variation in Profit on its own.
+    Geographic state is irrelevant at this sample size.
+    Administrative overhead has no positive independent effect on profit.
+
+  capital_allocation_priority:
+    - priority: 1
+      category: "R&D Spend"
+      rationale: "Builds competitive moat (non-negotiable)"
+    - priority: 2
+      category: "Marketing Spend"
+      rationale: "Realises R&D value in the market"
+    - priority: 3
+      category: "State selection"
+      rationale: "Low admin friction + high talent density (long-term structural decision)"
+    - priority: 4
+      category: "Administration"
+      rationale: "Minimise — target Admin_Ratio < 20% of Total_Spend"
+
+  limitations:
+    - limitation: "n = 50"
+      implication: "Wide confidence intervals on all estimates; CV std will be high"
+    - limitation: "No temporal data"
+      implication: "Cannot detect seasonality or growth trends"
+    - limitation: "Only 3 states"
+      implication: "Cannot generalise geographic conclusions"
+    - limitation: "Likely simulated data"
+      implication: "Real-world R²=0.97 for a single feature is extremely unusual"
+    - limitation: "No revenue / cost breakdown"
+      implication: "Cannot separate profit drivers further"
+    - limitation: "Causality unconfirmed"
+      implication: >
+        r=0.97 is correlation, not causation. R&D Spend may be a proxy for
+        company quality rather than the direct cause of higher profit.
