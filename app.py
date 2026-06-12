@@ -33,62 +33,80 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-/* ── global ── */
+/* ── global background ── */
 [data-testid="stAppViewContainer"] { background-color: #0d1117; }
-[data-testid="stSidebar"] { background-color: #161b22; }
+[data-testid="stSidebar"]          { background-color: #161b22; }
+
+/* ── global font size boost ── */
+html, body, [class*="css"] { font-size: 15px; }
+p, li, span { font-size: 15px; }
+
+/* ── sidebar text ── */
+[data-testid="stSidebar"] label  { color: #c9d1d9 !important; font-size: 14px !important; }
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] .stMarkdown { color: #c9d1d9 !important; font-size: 14px !important; }
+[data-testid="stSidebar"] h2 { color: #e6edf3 !important; font-size: 17px !important; }
+[data-testid="stSidebar"] .stCaption { color: #8b949e !important; font-size: 13px !important; }
 
 /* ── KPI card ── */
 .kpi-card {
-    background: #1c2333;
-    border: 1px solid #30363d;
-    border-radius: 10px;
-    padding: 18px 20px 14px;
-    min-height: 110px;
+    background: #182236;
+    border: 1px solid #2d4a7a;
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    min-height: 125px;
 }
 .kpi-label {
-    color: #8b949e;
-    font-size: 9.5px;
+    color: #7eb8da;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 1.3px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 .kpi-value {
-    color: #e6edf3;
-    font-size: 30px;
+    color: #ffffff;
+    font-size: 36px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
 }
 .kpi-highlight {
     color: #f0883e;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
     line-height: 1.4;
 }
-.kpi-delta-up   { color: #3fb950; font-size: 11px; margin-top: 3px; }
-.kpi-delta-down { color: #f85149; font-size: 11px; margin-top: 3px; }
+.kpi-delta-up   { color: #56d364; font-size: 13px; margin-top: 5px; }
+.kpi-delta-down { color: #f85149; font-size: 13px; margin-top: 5px; }
 
 /* ── tab bar ── */
 [data-testid="stTabs"] button {
-    color: #8b949e;
+    color: #8b949e !important;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 15px !important;
 }
 [data-testid="stTabs"] button[aria-selected="true"] {
-    color: #e6edf3;
-    border-bottom: 2px solid #e6edf3;
+    color: #e6edf3 !important;
+    border-bottom: 2px solid #7b68ee;
 }
 
 /* ── section header ── */
 .section-header {
-    font-size: 16px;
+    font-size: 19px;
     font-weight: 700;
     color: #e6edf3;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
+
+/* ── metric widget ── */
+[data-testid="stMetricValue"] { font-size: 28px !important; color: #ffffff !important; }
+[data-testid="stMetricLabel"] { font-size: 14px !important; color: #c9d1d9 !important; }
+
+/* ── dataframe ── */
+[data-testid="stDataFrame"] { font-size: 14px; }
+
+/* ── selectbox / slider labels ── */
+[data-testid="stWidgetLabel"] { font-size: 14px !important; color: #c9d1d9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -314,17 +332,19 @@ st.markdown('<div class="section-header">📊 Performance Analysis</div>',
             unsafe_allow_html=True)
 
 CHART_BG = "#161b22"
-GRID_COL = "#30363d"
-TEXT_COL = "#c9d1d9"
+GRID_COL = "#2d3748"
+TEXT_COL = "#e6edf3"
 
 CHART_LAYOUT = dict(
     paper_bgcolor=CHART_BG,
     plot_bgcolor=CHART_BG,
-    font=dict(color=TEXT_COL, size=11),
-    margin=dict(l=12, r=24, t=44, b=12),
-    height=360,
-    xaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL),
-    yaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL),
+    font=dict(color=TEXT_COL, size=14),
+    margin=dict(l=14, r=36, t=52, b=14),
+    height=400,
+    xaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL,
+               tickfont=dict(size=13), title_font=dict(size=14)),
+    yaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL,
+               tickfont=dict(size=13), title_font=dict(size=14)),
 )
 
 col_l, col_r = st.columns(2)
@@ -343,7 +363,7 @@ with col_l:
         marker=dict(color=bar_colors, line=dict(width=0)),
         text=[f"  {v:.4f}" for v in ev["Test R²"]],
         textposition="outside",
-        textfont=dict(color=TEXT_COL, size=10),
+        textfont=dict(color=TEXT_COL, size=13),
     ))
     fig_r2.add_vline(x=0.9, line=dict(color="#f85149", dash="dash", width=1.5),
                      annotation_text="Target 0.90",
@@ -375,7 +395,7 @@ with col_r:
         marker=dict(color=vote_colors, line=dict(width=0)),
         text=votes_sorted.values,
         textposition="outside",
-        textfont=dict(color=TEXT_COL, size=11),
+        textfont=dict(color=TEXT_COL, size=13),
     ))
     fig_votes.update_layout(
         title=dict(text=f"Feature Selection Consensus (Out of {n_methods} Algorithms)",
@@ -507,7 +527,7 @@ with tab2:
             ),
             text=[f"{c:,.1f}" for c in coefs],
             textposition="outside",
-            textfont=dict(color=TEXT_COL, size=10),
+            textfont=dict(color=TEXT_COL, size=13),
         ))
         fig_coef.add_vline(x=0, line=dict(color=TEXT_COL, width=0.8))
         fig_coef.update_layout(
