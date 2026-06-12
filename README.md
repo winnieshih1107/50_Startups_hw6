@@ -1,6 +1,10 @@
 # 50 Startups — Multiple Linear Regression (CRISP-DM)
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://startup-profit-predictor.streamlit.app/)
+
 A complete machine learning pipeline predicting startup profit from R&D, Administration, and Marketing spending, following the **CRISP-DM** (Cross Industry Standard Process for Data Mining) six-phase methodology.
+
+> **[Live Demo →](https://startup-profit-predictor.streamlit.app/)** Interactive app with 10-method feature selection comparison, real-time profit prediction simulator, and full model evaluation dashboard.
 
 ---
 
