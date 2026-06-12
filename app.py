@@ -366,10 +366,17 @@ with col_l:
         textposition="outside",
         textfont=dict(color=TEXT_COL, size=15),
     ))
-    fig_r2.add_vline(x=0.9, line=dict(color="#ff4444", dash="dash", width=3),
-                     annotation_text="▲ Target R²=0.90",
-                     annotation_font=dict(color="#ff4444", size=15, family="Arial Black"),
-                     annotation_position="top right")
+    fig_r2.add_vline(x=0.9, line=dict(color="#ff4444", dash="dash", width=3))
+    fig_r2.add_annotation(
+        x=0.9, y=1.0,
+        xref="x", yref="paper",
+        text="Target = 0.90",
+        showarrow=True, arrowhead=2, arrowwidth=2,
+        arrowcolor="#ff4444", ax=30, ay=-30,
+        font=dict(color="#ffffff", size=14, family="Arial"),
+        bgcolor="#ff4444", borderpad=5, borderwidth=0,
+        xanchor="left",
+    )
     fig_r2.update_layout(
         title=dict(text=f"Test R² by Selection Method", font=dict(size=13)),
         xaxis=dict(range=[max(0, ev["Test R²"].min() - 0.15), 1.08],
