@@ -283,6 +283,79 @@ work_report.pdf 加上附錄圖表
 
 ---
 
+---
+
+## Step 12 — README 加上 Live Demo 及海報圖
+
+### Prompt
+```
+README加上live demo
+README 加上海報圖（附件：手繪 CRISP-DM infographic）
+Project Poster替換附件圖
+```
+
+### 執行動作
+1. README 頂部加入 Streamlit badge 與 Live Demo callout 連結
+2. README 加入 `## Project Poster` 區段，嵌入 `poster_50startups.png`
+3. 將手繪 CRISP-DM 海報（`Gemini_Generated_Image_2j3iqz2j3iqz2j3i.png`）複製為 `poster_50startups.png`，取代程式生成版本
+4. Git push 三次（commit `97b666a`, `349dd38`, `8b1e479`）
+
+### 輸出
+- `README.md`（更新：Live Demo badge + 海報圖區段）
+- `poster_50startups.png`（更新：手繪版 CRISP-DM infographic，5.3 MB）
+
+---
+
+## Step 13 — 動畫影片生成（持續進行中）
+
+### Prompt
+```
+任務完成後會自動通知，產出 hw6_presentation_sam_animated.mp4
+```
+
+### 執行動作
+1. 原始 SAM2 版本（`sam_animate_video.py`）太慢，已棄用
+2. OpenCV 版 `fast_animate_video.py`：
+   - **v1**：每幀 Ken Burns resize（1920×1080 float32），GC 壓力過大 → ~8 min/slide
+   - **v2**：移除 Ken Burns、in-place ops → 仍有 boolean scatter 問題
+   - **v3（現行）**：全面向量化（`np.multiply` + `np.maximum` 取代 boolean gather/scatter） → ~2-3 min/slide（加速 3×）
+3. 已完成片段（截至切換電腦時）：
+   - `sam_seg_00.mp4`（5.4 MB，完成於 11:39）
+   - `sam_seg_01.mp4`（5.4 MB，完成於 12:07）
+   - `sam_seg_02.mp4`（1.8 MB，完成於 12:29）
+   - `sam_seg_03.mp4`（1.5 MB，完成於 12:33）
+
+### 新電腦繼續執行方式
+```bash
+# 1. 確認環境
+pip install opencv-python imageio-ffmpeg numpy Pillow
+
+# 2. 確認已有的片段（不需要重新渲染）
+ls D:\wi\260612\pres_pdf_assets\sam_tmp\
+
+# 3. 執行腳本（已存在的片段會自動跳過）
+cd D:\wi\260612
+python fast_animate_video.py
+
+# 4. 完成後 push 到 GitHub
+cd D:\wi\260612\repo_tmp
+cp ..\hw6_presentation_sam_animated.mp4 .
+git add hw6_presentation_sam_animated.mp4
+git commit -m "Add SAM-style spotlight animation video"
+git push origin main
+```
+
+### 注意事項
+- 片段檔案位於 `D:\wi\260612\pres_pdf_assets\sam_tmp\`，已完成的會自動跳過
+- `fast_animate_video.py` 已是 v3 優化版（向量化 spotlight + veryfast h264）
+- 若新電腦路徑不同，修改腳本第 16–17 行的 `BASE` 和 `ASSETS` 路徑
+- 預計剩餘 8 張投影片 × ~2-3 min = 約 20-25 分鐘
+
+### 預期輸出
+- `hw6_presentation_sam_animated.mp4`（預計 ~60 MB，完整 12 張投影片動畫）
+
+---
+
 ## 技術堆疊彙整
 
 | 類別 | 工具/套件 |
@@ -295,3 +368,17 @@ work_report.pdf 加上附錄圖表
 | PDF 輸出 | markdown, Chrome headless |
 | 版本控制 | git, GitHub |
 | 部署 | Streamlit Cloud |
+
+---
+
+## GitHub 最新狀態（截至 2026-06-12 12:34）
+
+| Commit | 說明 |
+|--------|------|
+| `8b1e479` | Update poster: replace with hand-drawn CRISP-DM infographic |
+| `349dd38` | README: add project poster image |
+| `97b666a` | README: add Live Demo badge and link to Streamlit app |
+| `09a45d4` | Add work report, poster, charts, animation scripts, session log |
+
+**Live Demo**：https://startup-profit-predictor.streamlit.app/  
+**GitHub**：https://github.com/winnieshih1107/50_Startups_hw6
