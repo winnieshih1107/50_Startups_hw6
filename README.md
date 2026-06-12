@@ -8,6 +8,12 @@ A complete machine learning pipeline predicting startup profit from R&D, Adminis
 
 ---
 
+## Project Poster
+
+![50 Startups CRISP-DM Poster](poster_50startups.png)
+
+---
+
 ## Table of Contents
 
 1. [Project Overview](#project-overview)
