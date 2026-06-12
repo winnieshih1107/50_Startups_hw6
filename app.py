@@ -38,15 +38,15 @@ st.markdown("""
 [data-testid="stSidebar"]          { background-color: #161b22; }
 
 /* ── global font size boost ── */
-html, body, [class*="css"] { font-size: 15px; }
-p, li, span { font-size: 15px; }
+html, body, [class*="css"] { font-size: 17px; }
+p, li, span { font-size: 17px; }
 
 /* ── sidebar text ── */
-[data-testid="stSidebar"] label  { color: #c9d1d9 !important; font-size: 14px !important; }
+[data-testid="stSidebar"] label  { color: #c9d1d9 !important; font-size: 16px !important; }
 [data-testid="stSidebar"] p,
-[data-testid="stSidebar"] .stMarkdown { color: #c9d1d9 !important; font-size: 14px !important; }
-[data-testid="stSidebar"] h2 { color: #e6edf3 !important; font-size: 17px !important; }
-[data-testid="stSidebar"] .stCaption { color: #8b949e !important; font-size: 13px !important; }
+[data-testid="stSidebar"] .stMarkdown { color: #c9d1d9 !important; font-size: 16px !important; }
+[data-testid="stSidebar"] h2 { color: #e6edf3 !important; font-size: 20px !important; }
+[data-testid="stSidebar"] .stCaption { color: #9bafc4 !important; font-size: 14px !important; }
 
 /* ── KPI card ── */
 .kpi-card {
@@ -58,55 +58,55 @@ p, li, span { font-size: 15px; }
 }
 .kpi-label {
     color: #7eb8da;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.0px;
     text-transform: uppercase;
     margin-bottom: 8px;
 }
 .kpi-value {
     color: #ffffff;
-    font-size: 36px;
+    font-size: 42px;
     font-weight: 700;
     line-height: 1.15;
 }
 .kpi-highlight {
     color: #f0883e;
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1.4;
 }
-.kpi-delta-up   { color: #56d364; font-size: 13px; margin-top: 5px; }
-.kpi-delta-down { color: #f85149; font-size: 13px; margin-top: 5px; }
+.kpi-delta-up   { color: #56d364; font-size: 15px; margin-top: 5px; }
+.kpi-delta-down { color: #f85149; font-size: 15px; margin-top: 5px; }
 
 /* ── tab bar ── */
 [data-testid="stTabs"] button {
     color: #8b949e !important;
     font-weight: 600;
-    font-size: 15px !important;
+    font-size: 17px !important;
 }
 [data-testid="stTabs"] button[aria-selected="true"] {
     color: #e6edf3 !important;
-    border-bottom: 2px solid #7b68ee;
+    border-bottom: 3px solid #7b68ee;
 }
 
 /* ── section header ── */
 .section-header {
-    font-size: 19px;
+    font-size: 22px;
     font-weight: 700;
     color: #e6edf3;
     margin-bottom: 8px;
 }
 
 /* ── metric widget ── */
-[data-testid="stMetricValue"] { font-size: 28px !important; color: #ffffff !important; }
-[data-testid="stMetricLabel"] { font-size: 14px !important; color: #c9d1d9 !important; }
+[data-testid="stMetricValue"] { font-size: 32px !important; color: #ffffff !important; }
+[data-testid="stMetricLabel"] { font-size: 16px !important; color: #c9d1d9 !important; }
 
 /* ── dataframe ── */
-[data-testid="stDataFrame"] { font-size: 14px; }
+[data-testid="stDataFrame"] { font-size: 15px; }
 
 /* ── selectbox / slider labels ── */
-[data-testid="stWidgetLabel"] { font-size: 14px !important; color: #c9d1d9 !important; }
+[data-testid="stWidgetLabel"] { font-size: 16px !important; color: #c9d1d9 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -274,12 +274,12 @@ sel_df, eval_df, feat_names, X_tr, X_te, y_tr, y_te = run_all(
 # Header
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown(
-    '<h1 style="color:#e6edf3;font-size:32px;font-weight:800;margin-bottom:2px;">'
+    '<h1 style="color:#e6edf3;font-size:38px;font-weight:800;margin-bottom:2px;">'
     '📈 Startup Profit Predictor</h1>',
     unsafe_allow_html=True,
 )
 st.markdown(
-    f'<p style="color:#8b949e;font-size:14px;margin-top:0;">'
+    f'<p style="color:#9bafc4;font-size:16px;margin-top:0;">'
     f'CRISP-DM Step 4: Comparing Feature Selectors Evaluated via '
     f'<b style="color:#c9d1d9">{model_name}</b></p>',
     unsafe_allow_html=True,
@@ -338,13 +338,14 @@ TEXT_COL = "#e6edf3"
 CHART_LAYOUT = dict(
     paper_bgcolor=CHART_BG,
     plot_bgcolor=CHART_BG,
-    font=dict(color=TEXT_COL, size=14),
-    margin=dict(l=14, r=36, t=52, b=14),
-    height=400,
+    font=dict(color=TEXT_COL, size=16),
+    margin=dict(l=14, r=40, t=56, b=14),
+    height=420,
     xaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL,
-               tickfont=dict(size=13), title_font=dict(size=14)),
+               tickfont=dict(size=15), title_font=dict(size=16)),
     yaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL,
-               tickfont=dict(size=13), title_font=dict(size=14)),
+               tickfont=dict(size=15), title_font=dict(size=16)),
+    title_font=dict(size=17),
 )
 
 col_l, col_r = st.columns(2)
@@ -363,11 +364,12 @@ with col_l:
         marker=dict(color=bar_colors, line=dict(width=0)),
         text=[f"  {v:.4f}" for v in ev["Test R²"]],
         textposition="outside",
-        textfont=dict(color=TEXT_COL, size=13),
+        textfont=dict(color=TEXT_COL, size=15),
     ))
-    fig_r2.add_vline(x=0.9, line=dict(color="#f85149", dash="dash", width=1.5),
-                     annotation_text="Target 0.90",
-                     annotation_font=dict(color="#f85149", size=10))
+    fig_r2.add_vline(x=0.9, line=dict(color="#ff4444", dash="dash", width=3),
+                     annotation_text="▲ Target R²=0.90",
+                     annotation_font=dict(color="#ff4444", size=15, family="Arial Black"),
+                     annotation_position="top right")
     fig_r2.update_layout(
         title=dict(text=f"Test R² by Selection Method", font=dict(size=13)),
         xaxis=dict(range=[max(0, ev["Test R²"].min() - 0.15), 1.08],
@@ -395,7 +397,7 @@ with col_r:
         marker=dict(color=vote_colors, line=dict(width=0)),
         text=votes_sorted.values,
         textposition="outside",
-        textfont=dict(color=TEXT_COL, size=13),
+        textfont=dict(color=TEXT_COL, size=15),
     ))
     fig_votes.update_layout(
         title=dict(text=f"Feature Selection Consensus (Out of {n_methods} Algorithms)",
@@ -527,7 +529,7 @@ with tab2:
             ),
             text=[f"{c:,.1f}" for c in coefs],
             textposition="outside",
-            textfont=dict(color=TEXT_COL, size=13),
+            textfont=dict(color=TEXT_COL, size=15),
         ))
         fig_coef.add_vline(x=0, line=dict(color=TEXT_COL, width=0.8))
         fig_coef.update_layout(
