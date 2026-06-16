@@ -356,117 +356,6 @@ git push origin main
 
 ---
 
----
-
----
-
-# 2026-06-15 工作日誌（第二次工作階段）
-
-**日期**：2026-06-15  
-**工作目錄**：`D:\wi\260612`  
-**模型**：Claude Sonnet 4.6 (claude-sonnet-4-6)  
-**接續任務**：動畫影片生成（上週 sam_seg_00~03 已完成，繼續製作剩餘片段）
-
----
-
-## Step 14 — 強化動畫腳本（首版 OpenCV 區域感知）
-
-### Prompt
-```
-剛剛在處理的影片？有在執行嗎
-（確認上次動畫任務狀態）
-```
-
-### 執行動作
-1. 確認上次任務（`fast_animate_video.py`，SAM spotlight 風格）已中斷，只完成 sam_seg_00~03
-2. 重新設計動畫效果，撰寫 `animate_enhanced.py`（09:18）：
-   - OpenCV Canny + findContours 自動偵測標題區、內容區、圖片區
-   - 標題區：由上往下 curtain wipe reveal
-   - 內容/文字區：左→右 wipe reveal（交替方向）
-   - 圖片區：亮度 + 輕微 Ken Burns
-   - 進場邊緣 leading edge glow（發光帶）
-   - 全亮定格 → 淡出
-3. 執行後僅完成第一張（`enh_seg_00.mp4`，1.5 MB），因每張需要大量 CPU 矩陣運算（~8 分鐘），改變策略
-
-### 輸出
-- `animate_enhanced.py`（區域感知版，已棄用）
-- `enh_tmp/enh_seg_00.mp4`（1.5 MB，僅第 0 張）
-
----
-
-## Step 15 — 純 ffmpeg 快速動畫版（全程完成）
-
-### Prompt
-```
-（改用純 ffmpeg 方式加速，避免 OpenCV CPU 瓶頸）
-```
-
-### 執行動作
-1. 撰寫 `animate_fast.py`（10:58）——完全使用 ffmpeg filter graph，不依賴 Python 圖像處理：
-   - **進場 wipe**：左→右掃描亮起（0~1.0s），邊緣 80px 漸層（`geq` filter）
-   - **Ken Burns**：偶數頁縮小→放大（1.0→1.04），奇數頁放大→縮小（1.04→1.0）
-   - **淡入 0.3s / 淡出 0.5s**（`fade` filter）
-   - **xfade 交叉淡化 0.6s** 串接各片段
-2. 逐一編碼 12 張投影片（平均每張約 2~3 分鐘）：
-   - 11:00 — `fseg_00.mp4`（4.4 MB）
-   - 11:02 — `fseg_01.mp4`（1.5 MB）
-   - 11:05 — `fseg_02.mp4`（4.6 MB）
-   - 11:08 — `fseg_03.mp4`（1.7 MB）
-   - 11:11 — `fseg_04.mp4`（3.7 MB）
-   - 11:14 — `fseg_05.mp4`（1.9 MB）
-   - 11:16 — `fseg_06.mp4`（3.4 MB）
-   - 11:19 — `fseg_07.mp4`（1.6 MB）
-   - 11:22 — `fseg_08.mp4`（4.1 MB）
-   - 11:25 — `fseg_09.mp4`（2.0 MB）
-   - 11:28 — `fseg_10.mp4`（4.4 MB）
-   - 11:32 — `fseg_11.mp4`（2.2 MB）
-3. xfade 串接 12 片段 → 輸出完整影片
-
-### 輸出
-- `animate_fast.py`（純 ffmpeg 快速版）
-- `pres_pdf_assets/fast_tmp/fseg_00~11.mp4`（12 片段，共 ~35 MB）
-- **`hw6_presentation_enhanced.mp4`（39.5 MB，完成於 11:33）** ✅
-
----
-
-## Step 16 — 逐行掃描動畫版 v2（進行中）
-
-### Prompt
-```
-（在 hw6_presentation_enhanced.mp4 完成後，嘗試更具視覺衝擊力的動畫效果）
-```
-
-### 執行動作
-1. 撰寫 `animate_fast_v2.py`（11:36）——改用「逐行掃描」動畫取代左→右 wipe：
-   - **row-stagger reveal**：每一行像素獨立亮起（top→bottom 或 bottom→top 交替）
-   - **掃描邊緣發光帶**（GLOW_HALF=40px），增加現代科技感
-   - **cubic ease-out** 緩動，視覺更流暢
-   - **Ken Burns**（ZOOM_RANGE=4%）+ **xfade 0.6s** 串接
-   - 底部暗度 BASE_DIM=0.12（未亮起區域保留 12% 亮度）
-2. 目前執行中（PID 20196，11:36 起）：
-   - `v2seg_00.mp4`（4.4 MB，完成於 11:40）✅
-   - `v2seg_01.mp4`（1.7 MB，完成於 11:45）✅
-   - `v2seg_02.mp4`（編碼中⏳）
-   - `v2seg_03~11.mp4`（待處理）
-3. 預計輸出：`hw6_presentation_enhanced.mp4`（覆蓋 Step 15 版本）
-
-### 輸出（預期）
-- `animate_fast_v2.py`（逐行掃描動畫版）
-- `pres_pdf_assets/v2_tmp/v2seg_00~11.mp4`（12 片段）
-- `hw6_presentation_enhanced.mp4`（更新版，逐行掃描效果）⏳
-
----
-
-## 2026-06-15 技術堆疊彙整（新增）
-
-| 腳本 | 方法 | 狀態 | 效果 |
-|------|------|------|------|
-| `animate_enhanced.py` | OpenCV 區域感知 | ❌ 棄用（太慢） | Wipe + curtain + glow |
-| `animate_fast.py` | 純 ffmpeg geq | ✅ **完成** | 左→右 wipe + Ken Burns |
-| `animate_fast_v2.py` | ffmpeg geq 逐行掃描 | ⏳ 執行中 | Row-scan + glow + Ken Burns |
-
----
-
 ## 技術堆疊彙整
 
 | 類別 | 工具/套件 |
@@ -474,7 +363,7 @@ git push origin main
 | 資料分析 | pandas, numpy, scikit-learn, statsmodels |
 | 視覺化 | matplotlib, seaborn, plotly |
 | Web 應用 | streamlit, plotly |
-| 影片處理 | ffmpeg (geq/zoompan/xfade filter), imageio-ffmpeg |
+| 影片處理 | ffmpeg (rawvideo pipe), imageio-ffmpeg, moviepy |
 | 圖像分割 | ultralytics (SAM2), opencv-python |
 | PDF 輸出 | markdown, Chrome headless |
 | 版本控制 | git, GitHub |
